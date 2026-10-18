@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Выбей Номер — Liquid Glass Edition</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #090a0f;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-card: rgba(20, 22, 30, 0.65);
+            --glass-hover: rgba(255, 255, 255, 0.06);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --white: #ffffff;
+            --shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            --glow: 0 0 25px rgba(255, 255, 255, 0.07);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.02) 0%, transparent 40%);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- ЭКРАН РЕГИСТРАЦИИ (LIQUID GLASS) --- */
+        #auth-screen {
+            position: fixed;
+            inset: 0;
+            background: rgba(9, 10, 15, 0.88);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .auth-box {
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 28px 22px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+        }
+
+        .auth-box h1 {
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .auth-box p {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 22px;
+            line-height: 1.5;
+        }
+
+        .input-field {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            color: var(--white);
+            padding: 14px 18px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin-bottom: 16px;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .input-field:focus {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .country-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .country-btn {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 14px 10px;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .country-btn.active {
+            border-color: var(--white);
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--white);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .primary-btn {
+            width: 100%;
+            background: var(--white);
+            color: #000;
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.15);
+        }
+
+        .primary-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* --- ВЕРХНИЙ БАР --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            background: var(--glass-card);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 10;
+        }
+
+        .balances {
+            display: flex;
+            gap: 8px;
+        }
+
+        .badge-stat {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(8px);
+        }
+
+        .notif-btn {
+            position: relative;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .notif-dot {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 8px;
+            height: 8px;
+            background: var(--white);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--white);
+            display: none;
+        }
+
+        /* --- ОСНОВНОЙ КОНТЕНТ --- */
+        main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            padding-bottom: 90px;
+        }
+
+        .tab-section {
+            display: none;
+            height: 100%;
+        }
+
+        .tab-section.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- РЕАЛИСТИЧНЫЙ АВТОМОБИЛЬНЫЙ НОМЕР (ГОСТ ФОТО-СТИЛЬ) --- */
+        .plate-stage {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            min-height: 280px;
+        }
+
+        .level-pill {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            margin-bottom: 18px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            backdrop-filter: blur(8px);
+        }
+
+        /* ФОТО-РЕАЛИСТИЧНАЯ ПЛАШКА НОМЕРА */
+        .real-plate {
+            background: linear-gradient(135deg, #fdfdfd 0%, #ececec 100%);
+            color: #111111;
+            /* Эффект реальной металлической штамповки и пластины */
+            border: 3px solid #1f242d;
+            border-radius: 10px;
+            box-shadow: 
+                inset 0 1px 2px rgba(255,255,255,0.8),
+                inset 0 -2px 4px rgba(0,0,0,0.15),
+                0 20px 40px rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: stretch;
+            height: 82px;
+            width: 100%;
+            max-width: 330px;
+            font-family: 'JetBrains Mono', monospace;
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+
+        .real-plate.spinning {
+            animation: plateShake 0.1s infinite;
+        }
+
+        @keyframes plateShake {
+            0% { transform: translateY(-2px) rotate(-0.5deg); }
+            50% { transform: translateY(2px) rotate(0.5deg); }
+            100% { transform: translateY(-2px) rotate(-0.5deg); }
+        }
+
+        .plate-content-main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 38px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            padding: 0 8px;
+            text-shadow: 0 1px 0 rgba(255,255,255,1), 0 -1px 0 rgba(0,0,0,0.15);
+        }
+
+        .plate-content-main small {
+            font-size: 28px;
+            margin: 0 2px;
+        }
+
+        .plate-region-section {
+            width: 80px;
+            border-left: 2.5px solid #1f242d;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 3px;
+            background: linear-gradient(135deg, #ffffff 0%, #e2e2e2 100%);
+        }
+
+        .plate-reg-code {
+            font-size: 26px;
+            font-weight: 800;
+            line-height: 1;
+            text-shadow: 0 1px 0 rgba(255,255,255,1);
+        }
+
+        .plate-rus-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .flag-ru-mini {
+            width: 18px;
+            height: 12px;
+            border: 0.5px solid #aaa;
+            background: linear-gradient(to bottom, #ffffff 33%, #0039a6 33%, #0039a6 66%, #d52b1e 66%);
+            margin-top: 1px;
+            border-radius: 1px;
+        }
+
+        .flag-by-mini {
+            width: 18px;
+            height: 12px;
+            border: 0.5px solid #aaa;
+            background: linear-gradient(to bottom, #d52b1e 66%, #009639 66%);
+            margin-top: 1px;
+            border-radius: 1px;
+        }
+
+        .price-display {
+            margin-top: 16px;
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--white);
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            letter-spacing: -0.5px;
+        }
+
+        /* КРУЖОЧЕК РЕРОЛЛА (ЖИДКОЕ СТЕКЛО) */
+        .reroll-fab {
+            margin-top: 16px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            color: var(--white);
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            transition: 0.2s;
+        }
+
+        .reroll-fab:active {
+            transform: scale(0.92);
+        }
+
+        /* --- КНОПКИ ДЕЙСТВИЙ --- */
+        .game-controls {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn-glass-sub {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: var(--white);
+            padding: 14px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            transition: 0.2s;
+        }
+
+        .btn-glass-sub:active {
+            transform: scale(0.98);
+            background: var(--glass-hover);
+        }
+
+        .btn-spin-main {
+            background: var(--white);
+            color: #000;
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.15);
+            transition: 0.2s;
+        }
+
+        .btn-spin-main:active {
+            transform: scale(0.98);
+        }
+
+        /* --- КАРТОЧКИ И СПИСКИ --- */
+        .section-title {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            letter-spacing: -0.3px;
+        }
+
+        .card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .glass-card {
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(12px);
+        }
+
+        /* МИНИ-НОМЕР ДЛЯ ГАРАЖА И ТОПА */
+        .mini-real-plate {
+            background: linear-gradient(135deg, #fff 0%, #ddd 100%);
+            color: #000;
+            border: 1.5px solid #333;
+            border-radius: 6px;
+            padding: 3px 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800;
+            font-size: 13px;
+            display: inline-block;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        /* --- НИЖНЯЯ НАВИГАЦИЯ --- */
+        nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(14, 16, 23, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            padding: 10px 4px 16px;
+            z-index: 20;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .nav-item.active {
+            color: var(--white);
+            text-shadow: 0 0 10px rgba(255,255,255,0.4);
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        /* --- МОДАЛЬНЫЕ ОКНА --- */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 6, 9, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 200;
+        }
+
+        .modal-backdrop.open {
+            display: flex;
+        }
+
+        .modal-window {
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 360px;
+            padding: 22px;
+            max-height: 80vh;
+            overflow-y: auto;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            font-weight: 800;
+            font-size: 17px;
+            letter-spacing: -0.3px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 22px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ЭКРАН РЕГИСТРАЦИИ -->
+    <div id="auth-screen">
+        <div class="auth-box">
+            <h1>Выбей Номер</h1>
+            <p>Уникальный коллекционный симулятор госномеров. Введи никнейм и выбери стандарт.</p>
+            <input type="text" id="nickname-input" class="input-field" placeholder="Твой никнейм..." maxlength="16">
+            <div class="country-selector">
+                <div class="country-btn active" id="select-ru" onclick="selectAuthCountry('RU')">🇷🇺 Россия</div>
+                <div class="country-btn" id="select-by" onclick="selectAuthCountry('BY')">🇧🇾 Беларусь</div>
+            </div>
+            <button class="primary-btn" onclick="completeRegistration()">Войти в игру</button>
+        </div>
+    </div>
+
+    <!-- ВЕРХНИЙ БАР -->
+    <header>
+        <div class="balances">
+            <div class="badge-stat">💰 <span id="ui-money">0</span> ₽</div>
+            <div class="badge-stat">⚡ <span id="ui-spins">15</span></div>
+        </div>
+        <div class="notif-btn" onclick="openModal('tasks-modal')">
+            🔔
+            <span class="notif-dot" id="quest-dot"></span>
+        </div>
+    </header>
+
+    <!-- ОСНОВНОЙ КОНТЕНТ -->
+    <main>
+        <!-- 1. ИГРА -->
+        <section id="tab-game" class="tab-section active">
+            <div class="plate-stage">
+                <div class="level-pill" id="plate-rarity">Готов к прокруту</div>
+
+                <!-- НАСТОЯЩИЙ ВИЗУАЛЬНЫЙ НОМЕР -->
+                <div class="real-plate" id="plate-box">
+                    <div class="plate-content-main" id="plate-text">А777АА</div>
+                    <div class="plate-region-section" id="plate-reg-container">
+                        <div class="plate-reg-code" id="plate-reg">77</div>
+                        <div class="plate-rus-box">
+                            <span id="plate-country-label">RUS</span>
+                            <div id="plate-flag" class="flag-ru-mini"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="price-display" id="plate-price">0 ₽</div>
+
+                <!-- КНОПКА-КРУЖОЧЕК ДЛЯ ТЮНИНГА -->
+                <div class="reroll-fab" title="Тюнинг номера" onclick="openModal('reroll-modal')">⚙️</div>
+            </div>
+
+            <div class="game-controls">
+                <div class="action-row" id="plate-actions" style="display: none;">
+                    <button class="btn-glass-sub" onclick="sellCurrentPlate()">Продать</button>
+                    <button class="btn-glass-sub" onclick="saveToGarage()">В гараж</button>
+                </div>
+                <button class="btn-spin-main" onclick="spinPlate()">КРУТИТЬ (1 ⚡)</button>
+            </div>
+        </section>
+
+        <!-- 2. ГАРАЖ -->
+        <section id="tab-garage" class="tab-section">
+            <div class="section-title">
+                <span>Мой Гараж</span>
+                <span style="font-size:13px; color:var(--text-muted);">Стоимость: <b id="garage-total" style="color:var(--white);">0</b> ₽</span>
+            </div>
+            <div class="card-list" id="garage-list"></div>
+        </section>
+
+        <!-- 3. МАГАЗИН -->
+        <section id="tab-shop" class="tab-section">
+            <div class="section-title">Магазин зарядов</div>
+            <div class="card-list">
+                <div class="glass-card">
+                    <div>
+                        <div style="font-weight:700;">20 прокрутов ⚡</div>
+                        <div style="font-size:12px; color:var(--text-muted);">Быстрый старт</div>
+                    </div>
+                    <button class="btn-glass-sub" style="padding:8px 14px;" onclick="buyStarsPack(20, 25)">25 ⭐</button>
+                </div>
+                <div class="glass-card">
+                    <div>
+                        <div style="font-weight:700;">70 прокрутов ⚡</div>
+                        <div style="font-size:12px; color:var(--text-muted);">Выгодно (+12%)</div>
+                    </div>
+                    <button class="btn-glass-sub" style="padding:8px 14px;" onclick="buyStarsPack(70, 65)">65 ⭐</button>
+                </div>
+                <div class="glass-card">
+                    <div>
+                        <div style="font-weight:700;">150 прокрутов ⚡</div>
+                        <div style="font-size:12px; color:var(--text-muted);">Элитный пакет</div>
+                    </div>
+                    <button class="btn-glass-sub" style="padding:8px 14px;" onclick="buyStarsPack(150, 150)">150 ⭐</button>
+                </div>
+                <div class="glass-card">
+                    <div>
+                        <div style="font-weight:700;">10 молний ⚡</div>
+                        <div style="font-size:12px; color:var(--text-muted);">За игровую валюту</div>
+                    </div>
+                    <button class="btn-glass-sub" style="padding:8px 14px;" onclick="buySpinsWithMoney()">1 000 ₽</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. ТОП -->
+        <section id="tab-top" class="tab-section">
+            <div class="section-title">🏆 ТОП Блатных Номеров</div>
+            <div class="card-list" id="leaderboard-list"></div>
+        </section>
+
+        <!-- 5. НАСТРОЙКИ -->
+        <section id="tab-settings" class="tab-section">
+            <div class="section-title">Настройки</div>
+            <div class="card-list">
+                <div class="glass-card">
+                    <span>Никнейм: <b id="settings-nick" style="color:var(--white);">Игрок</b></span>
+                    <button class="btn-glass-sub" style="padding:8px 12px;" onclick="changeNickPrompt()">Сменить</button>
+                </div>
+                <div class="glass-card">
+                    <span>Стандарт номеров</span>
+                    <button class="btn-glass-sub" id="settings-country-btn" style="padding:8px 12px;" onclick="toggleCountry()">🇷🇺 РФ</button>
+                </div>
+                <div class="glass-card">
+                    <span>🔊 Звук</span>
+                    <input type="checkbox" id="toggle-sound" checked onchange="saveSettings()">
+                </div>
+                <div class="glass-card">
+                    <span>📳 Вибрация</span>
+                    <input type="checkbox" id="toggle-vibe" checked onchange="saveSettings()">
+                </div>
+                <div class="glass-card" onclick="openModal('chances-modal')" style="cursor:pointer;">
+                    <span>🎲 Шансы и цены номеров</span>
+                    <span>➔</span>
+                </div>
+                <div class="glass-card" onclick="openModal('rules-modal')" style="cursor:pointer;">
+                    <span>📜 Правила игры</span>
+                    <span>➔</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- МОДАЛЬНОЕ ОКНО: ЗАДАЧИ -->
+    <div class="modal-backdrop" id="tasks-modal">
+        <div class="modal-window">
+            <div class="modal-header">
+                <span>🔔 Задания</span>
+                <button class="close-btn" onclick="closeModal('tasks-modal')">✕</button>
+            </div>
+            <p style="font-size:13px; color:var(--text-muted); margin-bottom:14px;">
+                Всего прокрутов сделано: <b id="total-spins-stat" style="color:#fff;">0</b>
+            </p>
+            <div class="card-list" id="quests-list"></div>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО: РЕРОЛЛ (ТЮНИНГ) -->
+    <div class="modal-backdrop" id="reroll-modal">
+        <div class="modal-window">
+            <div class="modal-header">
+                <span>⚙️ Тюнинг номера</span>
+                <button class="close-btn" onclick="closeModal('reroll-modal')">✕</button>
+            </div>
+            <p style="font-size:13px; color:var(--text-muted); margin-bottom:14px;">
+                Измени отдельный элемент текущего госномера на случайный за игровую валюту:
+            </p>
+            <div class="card-list">
+                <div class="glass-card">
+                    <span>Сменить <b>Цифры</b></span>
+                    <button class="btn-glass-sub" style="padding:8px 12px;" onclick="rerollPart('digits', 500)">500 ₽</button>
+                </div>
+                <div class="glass-card">
+                    <span>Сменить <b>Буквы</b></span>
+                    <button class="btn-glass-sub" style="padding:8px 12px;" onclick="rerollPart('letters', 400)">400 ₽</button>
+                </div>
+                <div class="glass-card">
+                    <span>Сменить <b>Регион</b></span>
+                    <button class="btn-glass-sub" style="padding:8px 12px;" onclick="rerollPart('region', 300)">300 ₽</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО: ШАНСЫ -->
+    <div class="modal-backdrop" id="chances-modal">
+        <div class="modal-window">
+            <div class="modal-header">
+                <span>🎲 Шансы и Редкость</span>
+                <button class="close-btn" onclick="closeModal('chances-modal')">✕</button>
+            </div>
+            <div style="font-size:13px; line-height:1.6; color:var(--text-muted);">
+                <p><b style="color:#fff;">⚪ Обычный (Ур. 1) — 68%</b><br>Стандартный рандом. Цена: до 3 500 ₽.</p><hr style="border-color:var(--glass-border); margin:10px 0;">
+                <p><b style="color:#fff;">🔵 Красивый (Ур. 2) — 20%</b><br>Зеркальные или ровные числа. До 20 000 ₽.</p><hr style="border-color:var(--glass-border); margin:10px 0;">
+                <p><b style="color:#fff;">🟣 Блатной (Ур. 3) — 8%</b><br>Спецсерии (АМР, ЕКХ, МММ). До 120 000 ₽.</p><hr style="border-color:var(--glass-border); margin:10px 0;">
+                <p><b style="color:#fff;">🟡 Эпический (Ур. 4) — 3.5%</b><br>Три/четыре одинаковые цифры (777). До 600 000 ₽.</p><hr style="border-color:var(--glass-border); margin:10px 0;">
+                <p><b style="color:#fff;">🔴 ЛЕГЕНДАРНЫЙ (Ур. 5) — 0.5%</b><br>Элитное комбо со столичным регионом! До 5 000 000 ₽.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО: ПРАВИЛА -->
+    <div class="modal-backdrop" id="rules-modal">
+        <div class="modal-window">
+            <div class="modal-header">
+                <span>📜 Правила игры</span>
+                <button class="close-btn" onclick="closeModal('rules-modal')">✕</button>
+            </div>
+            <div style="font-size:13px; line-height:1.6; color:var(--text-muted);">
+                1. Кнопка <b>«Крутить»</b> тратит 1 заряд молнии ⚡ и запускает генерацию госномера РФ или РБ.<br><br>
+                2. Выпавший номер можно <b>продать</b> за рубли или отправить в <b>Гараж</b>.<br><br>
+                3. Используй меню тюнинга (шестеренка ⚙️) для точечной перекрутки отдельных частей номера.<br><br>
+                4. Самый дорогой номер из гаража представляет тебя в <b>ТОП-листе</b> игроков.
+            </div>
+        </div>
+    </div>
+
+    <!-- НИЖНЕЕ МЕНЮ -->
+    <nav>
+        <div class="nav-item active" onclick="switchTab('game', this)">
+            <span class="nav-icon">🎰</span><span>Игра</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('garage', this)">
+            <span class="nav-icon">🚘</span><span>Гараж</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('shop', this)">
+            <span class="nav-icon">🛒</span><span>Магазин</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('top', this)">
+            <span class="nav-icon">🏆</span><span>Топ</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('settings', this)">
+            <span class="nav-icon">⚙️</span><span>Настройки</span>
+        </div>
+    </nav>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // Уникальный префикс для изоляции пользователей в localStorage на базе Telegram ID
+        const userId = tg.initDataUnsafe?.user?.id || 'guest_local';
+        const STORAGE_KEY = `vybey_nomer_user_${userId}`;
+
+        const LETTERS_RU = ['А','В','Е','К','М','Н','О','Р','С','Т','У','Х'];
+        const REGIONS_RU = ['77','97','777','99','78','98','95','05','23','16','50','66','54'];
+        const REGIONS_BY = ['1','2','3','4','5','6','7'];
+
+        let state = {
+            registered: false,
+            nickname: '',
+            country: 'RU',
+            money: 2500,
+            spins: 15,
+            totalSpins: 0,
+            garage: [],
+            claimedQuests: [],
+            sound: true,
+            vibe: true,
+            currentPlate: null
+        };
+
+        const QUESTS = [
+            { id: 'q10', target: 10, reward: 2, title: 'Сделать 10 прокрутов' },
+            { id: 'q20', target: 20, reward: 4, title: 'Сделать 20 прокрутов' },
+            { id: 'q30', target: 30, reward: 6, title: 'Сделать 30 прокрутов' },
+            { id: 'q50', target: 50, reward: 12, title: 'Сделать 50 прокрутов' },
+            { id: 'q100', target: 100, reward: 25, title: 'Сделать 100 прокрутов' }
+        ];
+
+        const BOT_LEADERS = [
+            { nick: 'Мажор_МСК', code: 'А777МР 97', price: 3200000 },
+            { nick: 'BrestBoss', code: '7777 АА-7', price: 2450000 },
+            { nick: 'ОперУполномоченный', code: 'Е001КХ 77', price: 1850000 },
+            { nick: 'Black_Prior', code: 'Х999ХХ 95', price: 890000 },
+            { nick: 'Minsk_Drift', code: '0001 ВВ-7', price: 420000 }
+        ];
+
+        function loadState() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                state = { ...state, ...JSON.parse(saved) };
+            }
+            if (state.registered) {
+                document.getElementById('auth-screen').style.display = 'none';
+            }
+            if (!state.currentPlate) {
+                state.currentPlate = createRandomPlateObject(state.country);
+            }
+            updateUI();
+        }
+
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        function selectAuthCountry(c) {
+            state.country = c;
+            document.getElementById('select-ru').classList.toggle('active', c === 'RU');
+            document.getElementById('select-by').classList.toggle('active', c === 'BY');
+        }
+
+        function completeRegistration() {
+            const nick = document.getElementById('nickname-input').value.trim();
+            if (!nick) {
+                alert('Введи никнейм!');
+                return;
+            }
+            state.nickname = nick;
+            state.registered = true;
+            state.currentPlate = createRandomPlateObject(state.country);
+            document.getElementById('auth-screen').style.display = 'none';
+            saveState();
+            updateUI();
+        }
+
+        function randItem(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function createRandomPlateObject(country) {
+            if (country === 'RU') {
+                const l1 = randItem(LETTERS_RU);
+                const l2 = randItem(LETTERS_RU);
+                const l3 = randItem(LETTERS_RU);
+                const d = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
+                const reg = randItem(REGIONS_RU);
+                return evaluatePlate({ country: 'RU', letters: l1 + l2 + l3, digits: d, region: reg });
+            } else {
+                const l1 = randItem(LETTERS_RU);
+                const l2 = randItem(LETTERS_RU);
+                const d = String(Math.floor(Math.random() * 9999) + 1).padStart(4, '0');
+                const reg = randItem(REGIONS_BY);
+                return evaluatePlate({ country: 'BY', letters: l1 + l2, digits: d, region: reg });
+            }
+        }
+
+        function evaluatePlate(p) {
+            let price = 1500;
+            let level = 1;
+            let rarityName = 'Ур. 1 • Обычный';
+
+            const d = p.digits;
+            const l = p.letters;
+            const reg = p.region;
+
+            const allSameDigits = /^(\d)\1+$/.test(d);
+            const isFirstTen = parseInt(d, 10) <= 9;
+            const isRound = d.endsWith('00');
+            const isMirror = d.length === 3 ? (d[0] === d[2]) : (d[0] === d[3] && d[1] === d[2]);
+
+            if (allSameDigits) {
+                price += (d[0] === '7' || d[0] === '9') ? 350000 : 180000;
+                level = Math.max(level, 4);
+            } else if (isFirstTen) {
+                price += 95000;
+                level = Math.max(level, 3);
+            } else if (isRound) {
+                price += 18000;
+                level = Math.max(level, 2);
+            } else if (isMirror) {
+                price += 8000;
+                level = Math.max(level, 2);
+            }
+
+            const allSameLetters = /^([А-Я])\1+$/.test(l);
+            const specSeries = ['АМР','ЕКХ','ВОР','ХЕР','ККК','МММ'];
+            if (allSameLetters || specSeries.includes(l)) {
+                price += 120000;
+                level = Math.max(level, 3);
+            }
+
+            if (['77','777','97','99','95','7'].includes(reg)) {
+                price = Math.round(price * 1.4);
+            }
+
+            if (allSameDigits && (allSameLetters || specSeries.includes(l))) {
+                price = Math.round(price * 4.2);
+                level = 5;
+            }
+
+            if (level === 2) rarityName = 'Ур. 2 • Красивый';
+            if (level === 3) rarityName = 'Ур. 3 • Блатной';
+            if (level === 4) rarityName = 'Ур. 4 • Эпический';
+            if (level === 5) rarityName = 'Ур. 5 • ЛЕГЕНДАРНЫЙ';
+
+            const fullText = p.country === 'RU' 
+                ? `${l[0]}${d}${l[1]}${l[2]} ${reg}`
+                : `${d} ${l}-${reg}`;
+
+            return { ...p, price, level, rarityName, fullText };
+        }
+
+        function spinPlate() {
+            if (state.spins <= 0) {
+                alert('Закончились молнии ⚡! Загляни в Магазин или забери награду в Уведомлениях.');
+                return;
+            }
+            state.spins--;
+            state.totalSpins++;
+            if (state.vibe && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+
+            const box = document.getElementById('plate-box');
+            box.classList.add('spinning');
+
+            let ticks = 0;
+            const interval = setInterval(() => {
+                const temp = createRandomPlateObject(state.country);
+                renderPlateVisual(temp);
+                ticks++;
+                if (ticks > 8) {
+                    clearInterval(interval);
+                    box.classList.remove('spinning');
+                    state.currentPlate = createRandomPlateObject(state.country);
+                    document.getElementById('plate-actions').style.display = 'grid';
+                    saveState();
+                    updateUI();
+                }
+            }, 60);
+        }
+
+        function rerollPart(part, cost) {
+            if (!state.currentPlate) return;
+            if (state.money < cost) {
+                alert('Недостаточно рублей ₽!');
+                return;
+            }
+            state.money -= cost;
+            const p = { ...state.currentPlate };
+
+            if (part === 'digits') {
+                p.digits = p.country === 'RU'
+                    ? String(Math.floor(Math.random() * 999) + 1).padStart(3, '0')
+                    : String(Math.floor(Math.random() * 9999) + 1).padStart(4, '0');
+            } else if (part === 'letters') {
+                p.letters = p.country === 'RU'
+                    ? randItem(LETTERS_RU) + randItem(LETTERS_RU) + randItem(LETTERS_RU)
+                    : randItem(LETTERS_RU) + randItem(LETTERS_RU);
+            } else if (part === 'region') {
+                p.region = p.country === 'RU' ? randItem(REGIONS_RU) : randItem(REGIONS_BY);
+            }
+
+            state.currentPlate = evaluatePlate(p);
+            document.getElementById('plate-actions').style.display = 'grid';
+            closeModal('reroll-modal');
+            saveState();
+            updateUI();
+        }
+
+        function sellCurrentPlate() {
+            if (!state.currentPlate) return;
+            state.money += state.currentPlate.price;
+            document.getElementById('plate-actions').style.display = 'none';
+            saveState();
+            updateUI();
+        }
+
+        function saveToGarage() {
+            if (!state.currentPlate) return;
+            state.garage.push({ ...state.currentPlate, id: Date.now() });
+            document.getElementById('plate-actions').style.display = 'none';
+            saveState();
+            updateUI();
+        }
+
+        function sellFromGarage(id) {
+            const idx = state.garage.findIndex(x => x.id === id);
+            if (idx === -1) return;
+            state.money += state.garage[idx].price;
+            state.garage.splice(idx, 1);
+            saveState();
+            updateUI();
+        }
+
+        function buySpinsWithMoney() {
+            if (state.money < 1000) {
+                alert('Нужно 1 000 ₽!');
+                return;
+            }
+            state.money -= 1000;
+            state.spins += 10;
+            saveState();
+            updateUI();
+        }
+
+        function buyStarsPack(spins, stars) {
+            if (confirm(`Покупка ${spins} ⚡ за ${stars} ⭐ Telegram Stars`)) {
+                state.spins += spins;
+                saveState();
+                updateUI();
+            }
+        }
+
+        function renderPlateVisual(p) {
+            const mainEl = document.getElementById('plate-text');
+            const regEl = document.getElementById('plate-reg');
+            const countryLabel = document.getElementById('plate-country-label');
+            const flagEl = document.getElementById('plate-flag');
+
+            if (p.country === 'RU') {
+                mainEl.innerHTML = `<small>${p.letters[0]}</small>${p.digits}<small>${p.letters[1]}${p.letters[2]}</small>`;
+                regEl.textContent = p.region;
+                countryLabel.textContent = 'RUS';
+                flagEl.className = 'flag-ru-mini';
+            } else {
+                mainEl.innerHTML = `${p.digits} <small>${p.letters}-${p.region}</small>`;
+                regEl.textContent = 'BY';
+                countryLabel.textContent = 'BLR';
+                flagEl.className = 'flag-by-mini';
+            }
+
+            document.getElementById('plate-rarity').textContent = p.rarityName;
+            document.getElementById('plate-price').textContent = p.price.toLocaleString('ru-RU') + ' ₽';
+        }
+
+        function updateUI() {
+            document.getElementById('ui-money').textContent = state.money.toLocaleString('ru-RU');
+            document.getElementById('ui-spins').textContent = state.spins;
+            document.getElementById('settings-nick').textContent = state.nickname || 'Игрок';
+            document.getElementById('settings-country-btn').textContent = state.country === 'RU' ? '🇷🇺 РФ' : '🇧🇾 РБ';
+
+            if (state.currentPlate) {
+                renderPlateVisual(state.currentPlate);
+            }
+
+            // Гараж
+            const garageEl = document.getElementById('garage-list');
+            const totalGarage = state.garage.reduce((acc, x) => acc + x.price, 0);
+            document.getElementById('garage-total').textContent = totalGarage.toLocaleString('ru-RU');
+
+            if (state.garage.length === 0) {
+                garageEl.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:30px;">Гараж пуст. Выбей первый номер!</div>`;
+            } else {
+                garageEl.innerHTML = state.garage
+                    .slice()
+                    .sort((a,b) => b.price - a.price)
+                    .map(item => `
+                        <div class="glass-card">
+                            <div>
+                                <span class="mini-real-plate">${item.fullText}</span>
+                                <div style="font-size:11px; color:var(--text-muted); margin-top:4px; font-weight:700;">
+                                    ${item.price.toLocaleString('ru-RU')} ₽ • ${item.rarityName}
+                                </div>
+                            </div>
+                            <button class="btn-glass-sub" style="padding:6px 10px; font-size:12px;" onclick="sellFromGarage(${item.id})">Продать</button>
+                        </div>
+                    `).join('');
+            }
+
+            // Квесты
+            let hasUnclaimed = false;
+            document.getElementById('total-spins-stat').textContent = state.totalSpins;
+            document.getElementById('quests-list').innerHTML = QUESTS.map(q => {
+                const done = state.totalSpins >= q.target;
+                const claimed = state.claimedQuests.includes(q.id);
+                if (done && !claimed) hasUnclaimed = true;
+                return `
+                    <div class="glass-card">
+                        <div>
+                            <div style="font-weight:700; font-size:13px;">${q.title}</div>
+                            <div style="font-size:11px; color:var(--text-muted);">Награда: +${q.reward} ⚡</div>
+                        </div>
+                        ${claimed 
+                            ? `<span style="color:var(--text-muted); font-size:12px;">Получено</span>`
+                            : done 
+                                ? `<button class="btn-glass-sub" style="padding:6px 10px; font-size:12px;" onclick="claimQuest('${q.id}',${q.reward})">Забрать</button>`
+                                : `<span style="color:var(--text-muted); font-size:12px;">${state.totalSpins}/${q.target}</span>`
+                        }
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('quest-dot').style.display = hasUnclaimed ? 'block' : 'none';
+
+            // ТОП
+            let allTop = [...BOT_LEADERS];
+            if (state.garage.length > 0) {
+                const bestUserPlate = state.garage.slice().sort((a,b) => b.price - a.price)[0];
+                allTop.push({
+                    nick: state.nickname + ' (Ты)',
+                    code: bestUserPlate.fullText,
+                    price: bestUserPlate.price
+                });
+            }
+            allTop.sort((a,b) => b.price - a.price);
+
+            const medals = ['🥇', '🥈', '🥉'];
+            document.getElementById('leaderboard-list').innerHTML = allTop.map((row, i) => `
+                <div class="glass-card" style="${i < 3 ? 'border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.06);' : ''}">
+                    <div>
+                        <div style="font-weight:700; font-size:13px; margin-bottom:4px;">
+                            ${i < 3 ? medals[i] : `#${i + 1}`} ${row.nick}
+                        </div>
+                        <span class="mini-real-plate">${row.code}</span>
+                    </div>
+                    <div style="font-weight:800; font-size:13px; color:var(--white);">
+                        ${row.price.toLocaleString('ru-RU')} ₽
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function claimQuest(id, reward) {
+            if (state.claimedQuests.includes(id)) return;
+            state.claimedQuests.push(id);
+            state.spins += reward;
+            saveState();
+            updateUI();
+        }
+
+        function switchTab(tab, el) {
+            document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('open'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+        function changeNickPrompt() {
+            const n = prompt('Новый никнейм:', state.nickname);
+            if (n && n.trim()) {
+                state.nickname = n.trim().slice(0, 16);
+                saveState();
+                updateUI();
+            }
+        }
+
+        function toggleCountry() {
+            state.country = state.country === 'RU' ? 'BY' : 'RU';
+            state.currentPlate = createRandomPlateObject(state.country);
+            saveState();
+            updateUI();
+        }
+
+        function saveSettings() {
+            state.sound = document.getElementById('toggle-sound').checked;
+            state.vibe = document.getElementById('toggle-vibe').checked;
+            saveState();
+        }
+
+        loadState();
+    </script>
+</body>
+</html>
